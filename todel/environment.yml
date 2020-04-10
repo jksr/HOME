@@ -1,0 +1,11 @@
+name: HOMEenv
+channels:
+- r
+dependencies:
+- r
+- python=2.7
+- numpy
+- pandas==0.17.1
+- scipy==0.17.1
+- scikit-learn==0.17.1
+- statsmodels==0.6.1

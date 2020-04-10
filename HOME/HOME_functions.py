@@ -116,10 +116,10 @@ def pval_format_withrep(df_path):
     filter_col2 = [col for col in list(df) if col.startswith(('mc_case'))]
     prop_names=[]
    
-    for i in xrange(1,len(filter_col1)+1):
+    for i in range(1,len(filter_col1)+1):
         prop_names.append("meth_cont"+str(i))
         
-    for i in xrange(1,len(filter_col2)+1):
+    for i in range(1,len(filter_col2)+1):
         prop_names.append("meth_case"+str(i))
         
     prop_table.columns=prop_names
@@ -154,7 +154,7 @@ def smoothing(*a):
     import numpy as np
     
     avg_value=[]
-    for i in xrange(len(a)):
+    for i in range(len(a)):
         if np.sign(i-1)==-1:
             p=0
         else:
@@ -168,7 +168,7 @@ def smoothing(*a):
     return avg_value
 def chunker(seq, size):
   
-   for pos in xrange(0, len(seq), size):
+   for pos in range(0, len(seq), size):
     
     start_df=max(0,pos-25)
     start=max(0,pos)
@@ -197,7 +197,7 @@ def norm_slidingwin_predict_CG(df_file,input_file_path,model_path):
    # x=np.array(df_file1)
 
     scaler = preprocessing.StandardScaler().fit(x)
-    for i in xrange(len(df_file)-1):
+    for i in range(len(df_file)-1):
   
             pos_index=i
             
@@ -221,7 +221,7 @@ def norm_slidingwin_predict_CG(df_file,input_file_path,model_path):
             val=(abs(pos_specific-pos1)/250.0)
             wght=[]
             
-            wght=map(fun_win, val)
+            wght=list(map(fun_win, val))
             
             bins=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
             hist,edges = np.histogram(mod_value, bins=bins,weights=wght)
@@ -274,7 +274,7 @@ def norm_slidingwin_predict_nonCG(df_file,input_file_path,model_path):
     
             status.append(sign_win)
             val=(abs(pos_specific-pos1)/10.0)
-            wght=map(fun_win, val)
+            wght=list(map(fun_win, val))
          
             bins=np.linspace(0,1,11) 
             hist,edges = np.histogram(mod_value, bins=bins,weights=wght)
@@ -312,7 +312,7 @@ def clustandtrim_CG(k,df1,sc,tr,dis_thres,ncb,prn,len_cutoff):
     file_idx=0
     start=0
     stop=0
-    for i in xrange(len(k)-1):
+    for i in range(len(k)-1):
         pos1=int(k.pos[i])
         pos2=int(k.pos[i+1])
         label=k.glm_predicted_values[i]
@@ -356,7 +356,7 @@ def clustandtrim_CG(k,df1,sc,tr,dis_thres,ncb,prn,len_cutoff):
     dmr_stop=[]
     m=0
     if len(final_dmrs)>1:
-        for i in xrange(len(final_dmrs)-1):
+        for i in range(len(final_dmrs)-1):
             
            start=final_dmrs.dmr_stop[i]
            stop=final_dmrs.dmr_start[i+1]
@@ -408,7 +408,7 @@ def clustandtrim_CG(k,df1,sc,tr,dis_thres,ncb,prn,len_cutoff):
         file_idx=0
         start=0
         stop=0
-        for i in xrange(len(final_dmrs)):  
+        for i in range(len(final_dmrs)):  
             start=final_dmrs.dmr_start[i]
             stop=final_dmrs.dmr_stop[i]
             win1=False
@@ -417,7 +417,7 @@ def clustandtrim_CG(k,df1,sc,tr,dis_thres,ncb,prn,len_cutoff):
             s=0
             p=0
        
-            for j in xrange(file_idx,len(df1)):
+            for j in range(file_idx,len(df1)):
     
                 if df1.pos[j]>=start and df1.pos[j]<=stop:
                    
@@ -515,7 +515,7 @@ def clustandtrim_nonCG1(k,sc):
  
     start=0
     stop=0
-    for i in xrange(len(k)-1):
+    for i in range(len(k)-1):
         pos1=int(k.pos[i])
         pos2=int(k.pos[i+1])
         label=k.glm_predicted_values[i]
@@ -599,7 +599,7 @@ def splitlist(k,df,npp,dis_thres):
     
     mod_chunks_list=[ key for key,_ in groupby(mod_chunks_list)]
     
-    for i in xrange(len(mod_chunks_list)-1):
+    for i in range(len(mod_chunks_list)-1):
        
        if i== len(mod_chunks_list)-2:
         df_split=df.ix[mod_chunks_list[i]:mod_chunks_list[i+1]]
@@ -619,7 +619,7 @@ def clustandtrim_nonCG2(k,final_dmrs,dis_thres,ncb,len_cutoff):
     
     m=1
     
-    for i in xrange(1,len(final_dmrs)):
+    for i in range(1,len(final_dmrs)):
         
        start=final_dmrs.dmr_stop[i-1]
        stop=final_dmrs.dmr_start[i]
@@ -675,7 +675,7 @@ def clustandtrim_nonCG2(k,final_dmrs,dis_thres,ncb,len_cutoff):
     mean_diff_case=[]
     mean_diff_cont=[]
     
-    for i in xrange(len(final_dmrs)):
+    for i in range(len(final_dmrs)):
         cg_start=final_dmrs.dmr_start[i]
         cg_stop=final_dmrs.dmr_stop[i]
         
@@ -748,7 +748,7 @@ def norm_slidingwin_predict_nonCG_withoutchunk(df_file,input_file_path,model_pat
     
 
     scaler = preprocessing.StandardScaler().fit(x)
-    for i in xrange(len(df_file)-1):
+    for i in range(len(df_file)-1):
   
             pos_index=i
             
@@ -770,7 +770,7 @@ def norm_slidingwin_predict_nonCG_withoutchunk(df_file,input_file_path,model_pat
 
             status.append(sign_win)
             val=(abs(pos_specific-pos1)/10.0)
-            wght=map(fun_win, val)
+            wght=list(map(fun_win, val))
             
             bins=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
             hist,edges = np.histogram(mod_value, bins=bins,weights=wght)

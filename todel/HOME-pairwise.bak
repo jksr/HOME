@@ -34,13 +34,13 @@ def main(c,nop):
         
         df_path=[]
         sample_name_temp=[]
-        for i in range(len(dictionary)):
+        for i in xrange(len(dictionary)):
             
             val=[]
             count=0
             d_rep={}
-            input_file1=list(dictionary.values())[i]
-            sample_name1=list(dictionary.keys())[i]
+            input_file1=dictionary.values()[i]
+            sample_name1=dictionary.keys()[i]
             sample_name_temp.append(sample_name1)
             
             for j in input_file1:
@@ -52,13 +52,13 @@ def main(c,nop):
                 filter_col1 = [col for col in list(d_rep[count]) if col.startswith(('h'))]
                 d_rep[count]=d_rep[count].loc[(d_rep[count][filter_col1]!=0).any(axis=1)]
             if Keepall==True: 
-                val.append(functools.reduce(mergeo, list(d_rep.values()))) 
+                val.append(functools.reduce(mergeo, d_rep.values())) 
                 df=functools.reduce(merge, val)
                 df.pos=df.pos.astype(int)
                 df.chr=df.chr.astype(str)
                 df=ho.fill_na(df)   
             else:    
-                val.append(functools.reduce(merge, list(d_rep.values())))            
+                val.append(functools.reduce(merge, d_rep.values()))            
                 df=functools.reduce(merge, val)         
             preordered = ["chr", "pos", "strand", "type"]  
             new_cols = preordered + [co for co in df.columns if co not in preordered]
@@ -66,19 +66,19 @@ def main(c,nop):
             df=df.sort_values(['pos'])
             df.to_csv(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c),header=True, index=False,sep='\t')    
             df_path.append(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c))  
-        dictionary_new = OrderedDict(list(zip(sample_name_temp,df_path)))
-        result_list = list(map(OrderedDict, itertools.combinations(iter(dictionary_new.items()), 2)))
+        dictionary_new = OrderedDict(zip(sample_name_temp,df_path))
+        result_list = map(OrderedDict, itertools.combinations(dictionary_new.iteritems(), 2))
         if o.withrespectto is not None:
-            result_list=[iii for iii in result_list if list(iii.keys())[0] in o.withrespectto] 
+            result_list=[iii for iii in result_list if iii.keys()[0] in o.withrespectto] 
         iii=0    
         for iii in result_list:
             
-            input_file1= iii[list(iii.keys())[0]]
-            input_file2=iii[list(iii.keys())[1]]
+            input_file1= iii[iii.keys()[0]]
+            input_file2=iii[iii.keys()[1]]
             
             if (len(input_file1)!=0 and len(input_file2)!=0):
-                sample_name1=list(iii.keys())[0]
-                sample_name2=list(iii.keys())[1]
+                sample_name1=iii.keys()[0]
+                sample_name2=iii.keys()[1]
                 dfa=pd.read_table(str(input_file1),header=0)
                 dfb=pd.read_table(str(input_file2),header=0)
                 ra=dfa.shape[1]-4
@@ -174,7 +174,7 @@ def main(c,nop):
                                 
                                 dmrs_filtered=ho.filterdmr(dmrs,minlen,mc,d)
                             else: 
-            	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+            	                    print "No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)
             	                    continue    
     #                          
                         elif classes=="CHG" or classes=="CHH" or classes=="CHN" or classes=="CNN":
@@ -221,7 +221,7 @@ def main(c,nop):
                                 if len(pre_dmr)>=1:
                                     df_split=ho.splitlist(k,pre_dmr,nop,dis_thres)
                                 else: 
-                	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                	                    print "No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)
                 	                    continue
                                 
                                 del(pre_dmr,k)
@@ -238,13 +238,13 @@ def main(c,nop):
                                 if len(pre_dmr)>=1:
                                     dmrs=ho.clustandtrim_nonCG2(k,pre_dmr,dis_thres,ncb,len_cutoff)
                                 else: 
-                	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                	                    print "No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)
                 	                    continue
                             if len(dmrs)>=1:
                                 
                                 dmrs_filtered=ho.filterdmr_nonCG(dmrs,minlen,mc,d) 
                             else: 
-            	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+            	                    print "No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)
             	                    continue     
                             
                         
@@ -253,16 +253,16 @@ def main(c,nop):
                             dmr_final=pd.concat([df1.chr[0:len(dmrs_filtered)],dmrs_filtered],axis=1)
                             dmr_final['chr'] = dmr_final['chr'].astype(str)
                             dmr_final.to_csv(o.outputpath+'/HOME_pairwise_DMRs/'+sample_name1+"_VS_"+sample_name2+"/HOME_DMRs_{c}.txt".format(c=c),header=True, index=False,sep='\t')
-                            print("DMRs for "+sample_name1+"_VS_"+sample_name2+"_{c} done".format(c=c))
+                            print "DMRs for "+sample_name1+"_VS_"+sample_name2+"_{c} done".format(c=c)
                             
                         elif len(dmrs_filtered)<1: 
-                            print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                            print "No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)
                     else: 
-                        print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                        print "No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)
                 else: 
-                    print("No DMRs found for {c} as no similar positions are observed in the files".format(c=c)) 
+                    print "No DMRs found for {c} as no similar positions are observed in the files".format(c=c) 
             else:
-                print("No DMRs found for {c} as file does not exit".format(c=c)) 
+                print "No DMRs found for {c} as file does not exit".format(c=c) 
         return 
            
     except Exception as e:
@@ -316,9 +316,9 @@ if __name__ == "__main__":
     samplenames.reset_index(drop=True,inplace=True)
     input_files=df_file.iloc[sp:sp+ns,1:]
     input_files.reset_index(drop=True,inplace=True)
-    numreps=[len(input_files.ix[x].dropna()) for x in range (len(input_files))]
+    numreps=[len(input_files.ix[x].dropna()) for x in xrange (len(input_files))]
     
-    input_files=[list(input_files.ix[x].dropna()) for x in range (len(input_files))]
+    input_files=[list(input_files.ix[x].dropna()) for x in xrange (len(input_files))]
     
     k=-1
     cwd = os.getcwd()
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     for i in input_files:
           temp_file=[]
           k=k+1
-          for ii in range(len(i)):
+          for ii in xrange(len(i)):
          
               if not os.path.exists((o.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1))):
                   
@@ -443,7 +443,7 @@ if __name__ == "__main__":
     s=[f.split('.')[0] for dp, dn, filenames in os.walk(o.outputpath+'/temp_HOME') for f in filenames if os.path.splitext(f)[1] == '.tsv']
     s = Counter(s)
     coun_s=len(os.walk(o.outputpath+'/temp_HOME').next()[1])
-    s=[kv for kv, v in s.items() if v == (coun_s)]
+    s=[kv for kv, v in s.iteritems() if v == (coun_s)]
     os.chdir(cwd)  
     
       
@@ -481,7 +481,7 @@ if __name__ == "__main__":
     pd.options.mode.chained_assignment = None
     mergeo = functools.partial(pd.merge, how='outer', on=['chr','pos',"strand","type"])  
     merge = functools.partial(pd.merge, how='inner', on=['chr','pos',"strand","type"])
-    dictionary = OrderedDict(list(zip(list(samplenames),list(input_files))))
+    dictionary = OrderedDict(zip(list(samplenames),list(input_files)))
     comb_samples=itertools.combinations(list(samplenames), 2)
     if o.withrespectto is not None:
         comb_samples=[coms for coms in comb_samples if coms[0] in o.withrespectto]
@@ -490,8 +490,8 @@ if __name__ == "__main__":
             os.makedirs(o.outputpath+'/HOME_pairwise_DMRs/'+i[0]+"_VS_"+i[1])
           
     if status==0:        
-        print("Preparing the DMRs from HOME.....") 
-        print("GOOD LUCK !") 
+        print"Preparing the DMRs from HOME....." 
+        print "GOOD LUCK !" 
         
 ### multiprocessing the chromosomes        
         
@@ -502,7 +502,7 @@ if __name__ == "__main__":
                 for dx in s:
                    main(dx,nop)
                 shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
-                print("Congratulations the DMRs are ready") 
+                print "Congratulations the DMRs are ready" 
                 remEmptyDir(o.outputpath+'/HOME_DMRs/')
    
 #           
@@ -512,7 +512,7 @@ if __name__ == "__main__":
                 process=[pool1.apply_async(main, args=(dx,nop)) for dx in s]
                 output = [p.get() for p in process]
                 pool1.close()
-                print("Congratulations the DMRs are ready")
+                print "Congratulations the DMRs are ready"
                 pool1.join()
                 shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
                 remEmptyDir(o.outputpath+'/HOME_DMRs/')

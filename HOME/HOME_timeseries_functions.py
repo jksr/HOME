@@ -103,10 +103,10 @@ def pval_format_withrep(df_path):
     filter_col2 = [col for col in list(df) if col.startswith(('h2'))]
     prop_names=[]
    
-    for i in xrange(1,len(filter_col1)+1):
+    for i in range(1,len(filter_col1)+1):
         prop_names.append("meth_cont"+str(i))
         
-    for i in xrange(1,len(filter_col2)+1):
+    for i in range(1,len(filter_col2)+1):
         prop_names.append("meth_case"+str(i))
         
     prop_table.columns=prop_names
@@ -146,7 +146,7 @@ def chunker1(seq, sizes):
     yield k
 def chunker(seq, size):
   
-   for pos in xrange(0, len(seq), size):
+   for pos in range(0, len(seq), size):
     
     start_df=max(0,pos-25)
     start=max(0,pos)
@@ -161,7 +161,7 @@ def smoothing(*a):
     import numpy as np
     
     avg_value=[]
-    for i in xrange(len(a)):
+    for i in range(len(a)):
         if np.sign(i-1)==-1:
             p=0
         else:
@@ -194,7 +194,7 @@ def norm_slidingwin_predict_CG(df_file,input_file_path,model_path):
 
     scaler = preprocessing.StandardScaler().fit(x)
     
-    for i in xrange(len(df_file)-1):
+    for i in range(len(df_file)-1):
   
             pos_index=i
             
@@ -260,7 +260,7 @@ def norm_slidingwin_predict_nonCG_withoutchunk(df_file,input_file_path,model_pat
    # x=np.array(df_file1)
 
     scaler = preprocessing.StandardScaler().fit(x)
-    for i in xrange(len(df_file)-1):
+    for i in range(len(df_file)-1):
   
             pos_index=i
             
@@ -375,7 +375,7 @@ def clustandtrim(k,sc,minlen,mc):
     no_c=[]
     start=0
     stop=0
-    for i in xrange(len(k)-1):
+    for i in range(len(k)-1):
         pos1=int(k.pos[i])
         pos2=int(k.pos[i+1])
         label=k.glm_predicted_values[i]
