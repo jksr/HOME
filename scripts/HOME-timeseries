@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Wed Apr 26 19:05:38 2017
@@ -63,7 +63,7 @@ def main(c):
             df.to_csv(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c),header=True, index=False,sep='\t')    
             df_path.append(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c))  
         dictionary_new = OrderedDict(list(zip(sample_name_temp,df_path)))
-        result_list = list(map(OrderedDict, itertools.combinations(iter(dictionary_new.items()), 2)))
+        result_list = list(map(OrderedDict, itertools.combinations(iter(list(dictionary_new.items())), 2)))
         df4=[] 
         for iii in result_list:
      
@@ -254,7 +254,7 @@ def main(c):
             dmr_final=dmr_final.reset_index(drop=True)
             dmr_final['chr'] = dmr_final['chr'].astype(str)
             dmr_final.to_csv(o.outputpath+'/HOME_Timeseries_DMRs'+"/"+"Timeseries_HOME_DMR_{c}.txt".format(c=c),header=True, index=False,sep='\t')
-            print("DMRs for {c} done".format(c=c))
+            print(("DMRs for {c} done".format(c=c)))
             for filename in glob.glob(o.outputpath+'/temp_HOME'+"/df_{c}_*.txt".format(c=c)) :
                 os.remove(filename)      
         return 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon Apr 16 12:15:36 2018
@@ -67,7 +68,7 @@ def main(c,nop):
             df.to_csv(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c),header=True, index=False,sep='\t')    
             df_path.append(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c))  
         dictionary_new = OrderedDict(list(zip(sample_name_temp,df_path)))
-        result_list = list(map(OrderedDict, itertools.combinations(iter(dictionary_new.items()), 2)))
+        result_list = list(map(OrderedDict, itertools.combinations(iter(list(dictionary_new.items())), 2)))
         if o.withrespectto is not None:
             result_list=[iii for iii in result_list if list(iii.keys())[0] in o.withrespectto] 
         iii=0    
@@ -174,7 +175,7 @@ def main(c,nop):
                                 
                                 dmrs_filtered=ho.filterdmr(dmrs,minlen,mc,d)
                             else: 
-            	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+            	                    print(("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)))
             	                    continue    
     #                          
                         elif classes=="CHG" or classes=="CHH" or classes=="CHN" or classes=="CNN":
@@ -221,7 +222,7 @@ def main(c,nop):
                                 if len(pre_dmr)>=1:
                                     df_split=ho.splitlist(k,pre_dmr,nop,dis_thres)
                                 else: 
-                	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                	                    print(("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)))
                 	                    continue
                                 
                                 del(pre_dmr,k)
@@ -238,13 +239,13 @@ def main(c,nop):
                                 if len(pre_dmr)>=1:
                                     dmrs=ho.clustandtrim_nonCG2(k,pre_dmr,dis_thres,ncb,len_cutoff)
                                 else: 
-                	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                	                    print(("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)))
                 	                    continue
                             if len(dmrs)>=1:
                                 
                                 dmrs_filtered=ho.filterdmr_nonCG(dmrs,minlen,mc,d) 
                             else: 
-            	                    print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+            	                    print(("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)))
             	                    continue     
                             
                         
@@ -253,16 +254,16 @@ def main(c,nop):
                             dmr_final=pd.concat([df1.chr[0:len(dmrs_filtered)],dmrs_filtered],axis=1)
                             dmr_final['chr'] = dmr_final['chr'].astype(str)
                             dmr_final.to_csv(o.outputpath+'/HOME_pairwise_DMRs/'+sample_name1+"_VS_"+sample_name2+"/HOME_DMRs_{c}.txt".format(c=c),header=True, index=False,sep='\t')
-                            print("DMRs for "+sample_name1+"_VS_"+sample_name2+"_{c} done".format(c=c))
+                            print(("DMRs for "+sample_name1+"_VS_"+sample_name2+"_{c} done".format(c=c)))
                             
                         elif len(dmrs_filtered)<1: 
-                            print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                            print(("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)))
                     else: 
-                        print("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c))
+                        print(("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)))
                 else: 
-                    print("No DMRs found for {c} as no similar positions are observed in the files".format(c=c)) 
+                    print(("No DMRs found for {c} as no similar positions are observed in the files".format(c=c))) 
             else:
-                print("No DMRs found for {c} as file does not exit".format(c=c)) 
+                print(("No DMRs found for {c} as file does not exit".format(c=c))) 
         return 
            
     except Exception as e:
@@ -443,7 +444,7 @@ if __name__ == "__main__":
     s=[f.split('.')[0] for dp, dn, filenames in os.walk(o.outputpath+'/temp_HOME') for f in filenames if os.path.splitext(f)[1] == '.tsv']
     s = Counter(s)
     coun_s=len(os.walk(o.outputpath+'/temp_HOME').next()[1])
-    s=[kv for kv, v in s.items() if v == (coun_s)]
+    s=[kv for kv, v in list(s.items()) if v == (coun_s)]
     os.chdir(cwd)  
     
       
