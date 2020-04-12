@@ -42,7 +42,7 @@ setup(
     #packages = ['HOME','HOME/saved_model','HOME/training_data'],
     #packages = ['HOME'],
     #package_data={'': ['*.npy','**/*.npy','*.txt','**/*.txt']},
-    package_data={'': ['*.npy','*.txt']},
+    package_data={'': ['*.npy','*.txt','*.R']},
     #package_data={'': package_data},
     #data_files=[('saved_model',['saved_model']),('training_data',['training_data'])],
     data_files=data_files,
