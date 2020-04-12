@@ -50,12 +50,12 @@ def main(c,nop, topass, args):
             for j in input_file1:
                 
                 count=count+1
-                c1=["chr", "pos", "strand", "type", "mc"+"_rep"+str(count), "h"+"_rep"+str(count)]
+                c1=["chr", "pos", "strand", "type", "mc_rep"+str(count), "h_rep"+str(count)]
                 
                 d_rep[count]=pd.read_table(j+'/'+c+'.tsv',header=None,names=c1)
                 filter_col1 = [col for col in list(d_rep[count]) if col.startswith(('h'))]
                 d_rep[count]=d_rep[count].loc[(d_rep[count][filter_col1]!=0).any(axis=1)]
-            if args.Keepall==True: 
+            if args.Keepall: 
                 val.append(functools.reduce(topass['mergeo'], list(d_rep.values()))) 
                 df=functools.reduce(topass['merge'], val)
                 df.pos=df.pos.astype(int)
@@ -74,7 +74,7 @@ def main(c,nop, topass, args):
         result_list = list(map(OrderedDict, itertools.combinations(iter(list(dictionary_new.items())), 2)))
         if args.withrespectto is not None:
             result_list=[iii for iii in result_list if list(iii.keys())[0] in args.withrespectto] 
-        iii=0    
+
         for iii in result_list:
             
             input_file1= iii[list(iii.keys())[0]]
@@ -183,8 +183,7 @@ def main(c,nop, topass, args):
                                     print(("No DMRs found for "+sample_name1+"_VS_"+sample_name2+"_{c}".format(c=c)))
                                     continue    
     #                          
-                        elif classes=="CHG" or classes=="CHH" or classes=="CHN" or classes=="CNN":
-                   
+                        else:
                             #input_file_path=np.load(os.getcwd()+'/training_data/hist_data_nonCG.npy')
                             input_file_path=np.load(package_path+'/training_data/hist_data_nonCG.npy')
                             #model_path=os.getcwd()+'/saved_model/nonCG/new/hist/'
@@ -290,7 +289,6 @@ def real_main():
     parser.add_argument('-md','--mergedist',  help='distance between DMRs to merge', required=False, type=int,default=500)
     parser.add_argument('-sin','--singlechrom',  help='parallel for single chromosomes',action='store_true',default=False)
     parser.add_argument('-npp','--numprocess', help='number of parallel processes for all chromosome', required=False, type=int,default=8)
-    parser.add_argument('-BSSeeker2','--BSSeeker2',  help='input CGmap file from BS-Seeker2',action='store_true',default=False)
     parser.add_argument('-mc','--minc', help='minimum number of C in a DMR to reported', required=False, type=int,default=3)
     parser.add_argument('-d','--delta', help='minimum average difference in methylation required', required=False, type=float,default=0.1)
     parser.add_argument('-prn','--prunningC', help='number of Cs required for prunning', required=False, type=int,default=3)
@@ -317,7 +315,6 @@ def real_main():
         
         ns=len(o.samplefilepath)
     #Keepall=o.Keepall     
-    BSSeeker2=o.BSSeeker2
     df_file=pd.read_table(o.samplefilepath,header=None)
     samplenames=df_file.iloc[sp:sp+ns,0]
     samplenames.reset_index(drop=True,inplace=True)
@@ -352,95 +349,13 @@ def real_main():
                         os.makedirs((o.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1)))
                     os.chdir((o.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1)))
                   
-                    if i[ii].endswith('.gz') and BSSeeker2==True:
-                        
-                        if classes=="CG":
-                        
-                            com='zcat'+' '+i[ii]+'''| awk -v OFS='\t' '{if ($2 == "C" && substr($4,1,2)== "CG") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,1,2) =="CG")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  '''
-                        
-                        elif classes=="CHG": 
-                            
-                            com='zcat'+' '+i[ii]+'''| awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)== "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  '''
-                        
-                        elif classes=="CHH":
-                            
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' 
-                            
-                        elif classes=="CHN": 
-                            
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' 
-                            
-                        elif classes=="CNN":
-                            
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if ($2 == "C" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" )  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' 
-                        
-                    elif  i[ii].endswith('.gz') and BSSeeker2==False: 
-                        
-                        if classes=="CG":
-                        
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,1,2)== "CG") {print $0 >> $1".tsv"}}'  '''
-                        
-                        elif classes=="CHG": 
-                            
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $0 >> $1".tsv"}}'  '''
-                        
-                        elif classes=="CHH":
-                            
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $0 >> $1".tsv"}}'  '''
-                            
-                        elif classes=="CHN": 
-                            
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,2,1)!= "G" ) {print $0 >> $1".tsv"}}'  '''
-                            
-                        elif classes=="CNN":
-                            
-                            com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{print $0 >> $1".tsv"}'  ''' 
-                            
-                    elif not i[ii].endswith('.gz') and BSSeeker2==True:
-                        
-                        if classes=="CG":
-                        
-                            com= '''  awk -v OFS='\t' '{if ($2 == "C" && substr($4,1,2)== "CG") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,1,2) =="CG")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                        
-                        elif classes=="CHG": 
-                            
-                            com=''' awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)== "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                        
-                        elif classes=="CHH":
-                            
-                            com= '''  awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                            
-                        elif classes=="CHN": 
-                            
-                            com='''  awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                            
-                        elif classes=="CNN":
-                            
-                            com='''  awk -v OFS='\t' '{if ($2 == "C" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" )  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                        
-                          
+                    com='zcat -f '+i[ii]+ ' | '
+                    if classes.startswith("CG"):
+                        com+=''' awk -v OFS='\t' '{if (substr($4,1,2)== "CG") {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6 >> $1".tsv"}}'  '''
                     else:
-                        
-                        if classes=="CG":
-                        
-                            com= '''  awk -v OFS='\t' '{if (substr($4,1,2)== "CG") {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                        
-                        elif classes=="CHG": 
-                            
-                            com=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                        
-                        elif classes=="CHH":
-                            
-                            com=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                            
-                        elif classes=="CHN": 
-                            
-                            com=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G" ) {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                            
-                        elif classes=="CNN":
-                            
-                            com=''' awk -v OFS='\t' '{print $0 >> $1".tsv"}'  ''' + i[ii]
-                          
+                        com+=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G") {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6 >> $1".tsv"}}'  '''
+
+
                     status=subprocess.call(com, shell=True)
                     
                     temp_file.append(os.getcwd())
@@ -507,18 +422,12 @@ def real_main():
 ### multiprocessing the chromosomes        
         
         if npp==1:  
-            
-        
-    
                 for dx in s:
                    main(dx,nop, topass, o)
-                shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
+                #shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
                 print("Congratulations the DMRs are ready") 
-                remEmptyDir(o.outputpath+'/HOME_DMRs/')
-   
-#           
+                #remEmptyDir(o.outputpath+'/HOME_DMRs/')
         elif npp>1:
-          
                 pool1= multiprocessing.Pool(processes=npp)
                 process=[pool1.apply_async(main, args=(dx,nop)) for dx in s]
                 output = [p.get() for p in process]
