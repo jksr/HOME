@@ -33,7 +33,8 @@ def fill_na(df_file):
     return df_file
 
 def format_allc(df,classes):
-   if classes=="CG":
+   #if classes=="CG":
+   if classes=="CGN":
         filter_col = [col for col in list(df) if col.startswith(('chr',"strand",'pos','mc','h'))]
         df=df[filter_col]
         v=df.chr[0] 
@@ -50,7 +51,8 @@ def format_allc(df,classes):
         filter_col = [col for col in list(df) if col.startswith(('h'))]
         df=df[(df[filter_col]> 0).all(axis=1)]
         df=df.reset_index(drop=True)
-   elif classes=="CHN" or classes=="CHG" or classes=="CHH" or classes=="CNN":
+   #elif classes=="CHN" or classes=="CHG" or classes=="CHH" or classes=="CNN":
+   else:
 
         filter_col = [col for col in list(df) if col.startswith(('chr','pos','mc','h'))]
         df=df[filter_col]

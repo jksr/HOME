@@ -52,7 +52,7 @@ def main(c,nop, topass, args):
                 count=count+1
                 c1=["chr", "pos", "strand", "type", "mc_rep"+str(count), "h_rep"+str(count)]
                 
-                d_rep[count]=pd.read_table(j+'/'+c+'.tsv',header=None,names=c1)
+                d_rep[count]=pd.read_csv(j+'/'+c+'.tsv',header=None,names=c1,sep='\t')
                 filter_col1 = [col for col in list(d_rep[count]) if col.startswith(('h'))]
                 d_rep[count]=d_rep[count].loc[(d_rep[count][filter_col1]!=0).any(axis=1)]
             if args.Keepall: 
@@ -83,8 +83,8 @@ def main(c,nop, topass, args):
             if (len(input_file1)!=0 and len(input_file2)!=0):
                 sample_name1=list(iii.keys())[0]
                 sample_name2=list(iii.keys())[1]
-                dfa=pd.read_table(str(input_file1),header=0)
-                dfb=pd.read_table(str(input_file2),header=0)
+                dfa=pd.read_csv(str(input_file1),sep='\t')
+                dfb=pd.read_csv(str(input_file2),sep='\t')
                 ra=dfa.shape[1]-4
                 rb=dfb.shape[1]-4
         
@@ -163,7 +163,8 @@ def main(c,nop, topass, args):
                         
                             df3=ho.pval_cal_withoutrep(df1)
                         
-                        if classes=="CG":
+                        #if classes.startswith("CG"):
+                        if classes=="CGN":
                             #input_file_path=np.load(os.getcwd()+'/training_data/hist_data_CG.npy')
                             input_file_path=np.load(package_path+'/training_data/hist_data_CG.npy')
                             
@@ -280,14 +281,14 @@ def real_main():
     np.set_printoptions(threshold=np.inf,suppress=True,linewidth=np.inf,precision=3)
     parser = argparse.ArgumentParser(description='HOME -- HISTOGRAM Of METHYLATION',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i','--samplefilepath', help='path of the sample file with samplename and sample path TAB seperated', required=True)
-    parser.add_argument('-t','--type', help='type of class', choices=["CG","CHG","CHH","CHN","CNN"],required=True, type=str)
+    parser.add_argument('-t','--type', help='type of class', choices=["CGN","CHN"],required=True, type=str)
     parser.add_argument('-o','--outputpath', help='path where the DMRs will be saved', required=True)
     parser.add_argument('-sc','--scorecutoff',  help='min classifier score required to cluster the DMR',choices=np.round(np.linspace(0,1,20,endpoint=False),decimals=2), required=False, type=float,default=0.1)
     parser.add_argument('-p','--pruncutoff', help='prunning cutoff for boundaries', required=False,choices=np.round(np.arange(0,0.5,0.1),decimals=1), type=float,default=0.1)
     parser.add_argument('-ml','--minlength', help='minimum length of DMRs to be reported', required=False, type=int,default=50)
     parser.add_argument('-ncb','--numcb',  help='number of Cs required between DMRs to keep them seperate', required=False, type=int,default=5)
     parser.add_argument('-md','--mergedist',  help='distance between DMRs to merge', required=False, type=int,default=500)
-    parser.add_argument('-sin','--singlechrom',  help='parallel for single chromosomes',action='store_true',default=False)
+    #parser.add_argument('-sin','--singlechrom',  help='parallel for single chromosomes',action='store_true',default=False)
     parser.add_argument('-npp','--numprocess', help='number of parallel processes for all chromosome', required=False, type=int,default=8)
     parser.add_argument('-mc','--minc', help='minimum number of C in a DMR to reported', required=False, type=int,default=3)
     parser.add_argument('-d','--delta', help='minimum average difference in methylation required', required=False, type=float,default=0.1)
@@ -315,7 +316,7 @@ def real_main():
         
         ns=len(o.samplefilepath)
     #Keepall=o.Keepall     
-    df_file=pd.read_table(o.samplefilepath,header=None)
+    df_file=pd.read_csv(o.samplefilepath,header=None, sep='\t')
     samplenames=df_file.iloc[sp:sp+ns,0]
     samplenames.reset_index(drop=True,inplace=True)
     input_files=df_file.iloc[sp:sp+ns,1:]
@@ -350,7 +351,7 @@ def real_main():
                     os.chdir((o.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1)))
                   
                     com='zcat -f '+i[ii]+ ' | '
-                    if classes.startswith("CG"):
+                    if classes=="CGN":
                         com+=''' awk -v OFS='\t' '{if (substr($4,1,2)== "CG") {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6 >> $1".tsv"}}'  '''
                     else:
                         com+=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G") {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6 >> $1".tsv"}}'  '''
@@ -389,13 +390,14 @@ def real_main():
     ncb=o.numcb
     mc=o.minc
     d=o.delta
-    sin=o.singlechrom
+    #sin=o.singlechrom
     npp=o.numprocess
-    if sin==True:
-        nop=npp
-        npp=1
-    else: 
-        nop=1
+    nop=1
+    #if sin==True:
+    #    nop=npp
+    #    npp=1
+    #else: 
+    #    nop=1
         
     
    #"handle any number of replicates as long as it is 2+ in all groups but cannot handle 1 replicate in 1 group and multiple in the other"
@@ -418,22 +420,37 @@ def real_main():
     if status==0:        
         print("Preparing the DMRs from HOME.....") 
         print("GOOD LUCK !") 
-        
-### multiprocessing the chromosomes        
-        
+
+
         if npp==1:  
                 for dx in s:
-                   main(dx,nop, topass, o)
-                #shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
+                   main(dx,nop,topass,o)
+                shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
                 print("Congratulations the DMRs are ready") 
-                #remEmptyDir(o.outputpath+'/HOME_DMRs/')
+                remEmptyDir(o.outputpath+'/HOME_DMRs/')
         elif npp>1:
                 pool1= multiprocessing.Pool(processes=npp)
-                process=[pool1.apply_async(main, args=(dx,nop)) for dx in s]
+                process=[pool1.apply_async(main, args=(dx,nop,o)) for dx in s]
                 output = [p.get() for p in process]
                 pool1.close()
                 print("Congratulations the DMRs are ready")
                 pool1.join()
                 shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
                 remEmptyDir(o.outputpath+'/HOME_DMRs/')
-  
+      
+
+
+
+
+
+        #print 'npp',npp
+        #print s
+        #pool1= multiprocessing.Pool(processes=npp)
+        #process=[pool1.apply_async(main, args=(dx,nop,topass,o)) for dx in s]
+        #output = [p.get() for p in process]
+        #pool1.close()
+        #print("Congratulations the DMRs are ready")
+        #pool1.join()
+        #shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
+        #remEmptyDir(o.outputpath+'/HOME_DMRs/')
+ 
