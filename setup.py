@@ -20,7 +20,7 @@ data_files = [ (site_dir+'/HOME/'+str(x.parent),[str(x)]) for x in data_files]
 package_data = []
 for i in range(10):
 	package_data += glob.glob('*/'*i+'*.npy')+glob.glob('*/'*i+'*.npy')
-print package_data
+#print package_data
 
 setup(
     name = 'HOME',
@@ -48,7 +48,8 @@ setup(
     data_files=data_files,
     entry_points={
         'console_scripts': ['HOME-pairwise=HOME.home_pairwise:real_main',
-                            #'HOME-timeseries=scripts.HOME-timeseries:real_main'
+                            #'HOME-timeseries=scripts.HOME-timeseries:real_main',
+                            'HOME-timeseries=HOME.home_timeseries:real_main'
 							],
     }
 )

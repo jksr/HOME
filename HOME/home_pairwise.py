@@ -90,7 +90,7 @@ def main(c,nop, topass, args):
         
                 p_mc=3
                 p_h=4
-                for i in range(1,((ra)/2)+1):
+                for i in range(1,((ra)//2)+1):
                     
                     dfa.rename(columns={dfa.columns[i+p_mc]:"mc_cont_rep"+str(i)}, inplace = True)
                     dfa.rename(columns={dfa.columns[i+p_h]:"h_cont"+"_rep"+str(i)}, inplace = True)
@@ -99,7 +99,7 @@ def main(c,nop, topass, args):
                     
                 p_mc=3
                 p_h=4    
-                for i in range(1,((rb)/2)+1):
+                for i in range(1,((rb)//2)+1):
                    
                     dfb.rename(columns={dfb.columns[i+p_mc]:"mc_case"+"_rep"+str(i)}, inplace = True)
                     dfb.rename(columns={dfb.columns[i+p_h]:"h_case"+"_rep"+str(i)}, inplace = True)
@@ -116,7 +116,7 @@ def main(c,nop, topass, args):
                         
                         if min(numreps)>1 and max(numreps)>1:
                             nop=min(nop,len(df1))
-                            CHUNKSIZE = int(len(df1)/nop)
+                            CHUNKSIZE = int(len(df1)//nop)
                             CHUNKSIZE_list=[CHUNKSIZE]*nop 
                             extra=(len(df1)%nop)
                             
@@ -211,7 +211,7 @@ def main(c,nop, topass, args):
                             k["h_case"]=df3.h_case
                             del(df3)
                             if (nop>1 and nop<len(k)):
-                                CHUNKSIZE = int(len(k)/nop)
+                                CHUNKSIZE = int(len(k)//nop)
                                 CHUNKSIZE_list=[CHUNKSIZE]*nop 
                                 extra=(len(k)%nop)
                                 
@@ -321,10 +321,10 @@ def real_main():
     samplenames.reset_index(drop=True,inplace=True)
     input_files=df_file.iloc[sp:sp+ns,1:]
     input_files.reset_index(drop=True,inplace=True)
-    numreps=[len(input_files.ix[x].dropna()) for x in range (len(input_files))]
+    numreps=[len(input_files.iloc[x].dropna()) for x in range (len(input_files))]
     topass['numreps']=numreps
     
-    input_files=[list(input_files.ix[x].dropna()) for x in range (len(input_files))]
+    input_files=[list(input_files.iloc[x].dropna()) for x in range (len(input_files))]
     
     k=-1
     cwd = os.getcwd()
@@ -367,7 +367,7 @@ def real_main():
     #s=[ os.path.splitext(os.path.basename(x))[0] for x in glob.glob(input_files[0][0]+'/*.tsv')]
     s=[f.split('.')[0] for dp, dn, filenames in os.walk(o.outputpath+'/temp_HOME') for f in filenames if os.path.splitext(f)[1] == '.tsv']
     s = Counter(s)
-    coun_s=len(os.walk(o.outputpath+'/temp_HOME').next()[1])
+    coun_s=len(next(os.walk(o.outputpath+'/temp_HOME'))[1])
     s=[kv for kv, v in list(s.items()) if v == (coun_s)]
     os.chdir(cwd)  
     
@@ -423,14 +423,16 @@ def real_main():
 
 
         if npp==1:  
+                print('ha')
                 for dx in s:
                    main(dx,nop,topass,o)
                 shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
                 print("Congratulations the DMRs are ready") 
                 remEmptyDir(o.outputpath+'/HOME_DMRs/')
         elif npp>1:
+                print('he')
                 pool1= multiprocessing.Pool(processes=npp)
-                process=[pool1.apply_async(main, args=(dx,nop,o)) for dx in s]
+                process=[pool1.apply_async(main, args=(dx,nop,topass,o)) for dx in s]
                 output = [p.get() for p in process]
                 pool1.close()
                 print("Congratulations the DMRs are ready")

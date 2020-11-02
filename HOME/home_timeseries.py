@@ -30,17 +30,20 @@ def remEmptyDir(mypath):
              if not os.listdir(fname): #to check wither the dir is empty
                  
                  os.removedirs(fname)
-def main(c):
+def main(c,nop, topass, args):
+    package_path = os.path.dirname(os.path.abspath(__file__))
+    classes = args.type
+    numreps=topass['numreps']
     try: 
         df_path=[]
         sample_name_temp=[]
-        for i in range(len(dictionary)):
+        for i in range(len(topass['dictionary'])):
             
             val=[]
             count=0
             d_rep={}
-            input_file1=list(dictionary.values())[i]
-            sample_name1=list(dictionary.keys())[i]
+            input_file1=list(topass['dictionary'].values())[i]
+            sample_name1=list(topass['dictionary'].keys())[i]
             sample_name_temp.append(sample_name1)
             
             for j in input_file1:
@@ -50,18 +53,18 @@ def main(c):
                 d_rep[count]=pd.read_table(j+'/'+c+'.tsv',header=None,names=c1)
                 filter_col1 = [col for col in list(d_rep[count]) if col.startswith(('h'))]
                 d_rep[count]=d_rep[count].loc[(d_rep[count][filter_col1]!=0).any(axis=1)]
-            if Keepall==True: 
-                val.append(functools.reduce(mergeo, list(d_rep.values()))) 
-                df=functools.reduce(merge, val)
+            if args.Keepall==True: 
+                val.append(functools.reduce(topass['mergeo'], list(d_rep.values()))) 
+                df=functools.reduce(topass['merge'], val)
                 df.pos=df.pos.astype(int)
                 df.chr=df.chr.astype(str)
                 df=ho.fill_na(df)
             else:    
-                val.append(functools.reduce(merge, list(d_rep.values())))            
-                df=functools.reduce(merge, val)
+                val.append(functools.reduce(topass['merge'], list(d_rep.values())))            
+                df=functools.reduce(topass['merge'], val)
             df=df.sort_values(['pos'])
-            df.to_csv(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c),header=True, index=False,sep='\t')    
-            df_path.append(o.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c))  
+            df.to_csv(args.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c),header=True, index=False,sep='\t')    
+            df_path.append(args.outputpath+'/temp_HOME/'+sample_name1+"_format_{c}.txt".format(c=c))  
         dictionary_new = OrderedDict(list(zip(sample_name_temp,df_path)))
         result_list = list(map(OrderedDict, itertools.combinations(iter(list(dictionary_new.items())), 2)))
         df4=[] 
@@ -78,7 +81,7 @@ def main(c):
     
             p_mc=3
             p_h=4
-            for i in range(1,((ra)/2)+1):
+            for i in range(1,((ra)//2)+1):
                 
                 dfa.rename(columns={dfa.columns[i+p_mc]:"mc1_rep"+str(i)}, inplace = True)
                 dfa.rename(columns={dfa.columns[i+p_h]:"h1"+"_rep"+str(i)}, inplace = True)
@@ -87,7 +90,7 @@ def main(c):
                 
             p_mc=3
             p_h=4    
-            for i in range(1,((rb)/2)+1):
+            for i in range(1,((rb)//2)+1):
                
                 dfb.rename(columns={dfb.columns[i+p_mc]:"mc2"+"_rep"+str(i)}, inplace = True)
                 dfb.rename(columns={dfb.columns[i+p_h]:"h2"+"_rep"+str(i)}, inplace = True)
@@ -116,8 +119,8 @@ def main(c):
                 for i in df_chunk:
                     
                     ttc=ttc+1
-                    i.to_csv(o.outputpath+'/temp_HOME'+'/chunks/'+sample_name1+"VS"+sample_name2+"_df_{c}_{ttc}.txt".format(c=c,ttc=ttc),header=True, index=False,sep='\t')    
-                    df_path.append(o.outputpath+'/temp_HOME'+'/chunks/'+sample_name1+"VS"+sample_name2+"_df_{c}_{ttc}.txt".format(c=c,ttc=ttc))
+                    i.to_csv(args.outputpath+'/temp_HOME'+'/chunks/'+sample_name1+"VS"+sample_name2+"_df_{c}_{ttc}.txt".format(c=c,ttc=ttc),header=True, index=False,sep='\t')    
+                    df_path.append(args.outputpath+'/temp_HOME'+'/chunks/'+sample_name1+"VS"+sample_name2+"_df_{c}_{ttc}.txt".format(c=c,ttc=ttc))
                    
                 if nop>1:    
                     
@@ -146,17 +149,22 @@ def main(c):
             
                 df3=ho.pval_cal_withoutrep(df1)
        
-            if classes=="CG":
+            if classes=="CGN":
     
-                input_file_path=np.load(os.getcwd()+'/training_data/hist_data_CG.npy')
+                #input_file_path=np.load(os.getcwd()+'/training_data/hist_data_CG.npy')
+                input_file_path=np.load(package_path+'/training_data/hist_data_CG.npy')
                             
-                model_path=os.getcwd()+'/saved_model/CG/new/hist/'
+                #model_path=os.getcwd()+'/saved_model/CG/new/hist/'
+                model_path=package_path+'/saved_model/CG/new/hist/'
                 k=ho.norm_slidingwin_predict_CG(df3,input_file_path,model_path)
                 
-            elif classes=="CHG" or classes=="CHH" or classes=="CHN" or classes=="CNN":
+            #elif classes=="CHG" or classes=="CHH" or classes=="CHN" or classes=="CNN":
+            else:
        
-                input_file_path=np.load(os.getcwd()+'/training_data/hist_data_nonCG.npy')
-                model_path=os.getcwd()+'/saved_model/nonCG/new/hist/'
+                #input_file_path=np.load(os.getcwd()+'/training_data/hist_data_nonCG.npy')
+                input_file_path=np.load(package_path+'/training_data/hist_data_nonCG.npy')
+                #model_path=os.getcwd()+'/saved_model/nonCG/new/hist/'
+                model_path=package_path+'/saved_model/nonCG/new/hist/'
                 if nop>1:
                     CHUNKSIZE = int(len(df3)/nop)
                     df_chunk=ho.chunker(df3,CHUNKSIZE)
@@ -174,7 +182,7 @@ def main(c):
             df4.append(k)
             
         for i, df in enumerate(df4, start=1):
-                    df.rename(columns={col:'{}_df{}'.format(col, i) for col in ('glm_predicted_values', 'delta','win_sign')}, inplace=True)         
+            df.rename(columns={col:'{}_df{}'.format(col, i) for col in ('glm_predicted_values', 'delta','win_sign')}, inplace=True)         
         merge1 = functools.partial(pd.merge, how='inner', on=['pos'])
         dfd=functools.reduce(merge1, df4) 
         
@@ -183,7 +191,7 @@ def main(c):
         final_val=pd.concat([dfd.pos,sum_val], axis=1)
         final_val.columns=['pos','glm_predicted_values']
         
-        dmrs=ho.clustandtrim(final_val,sc,minlen,mc)
+        dmrs=ho.clustandtrim(final_val,args.scorecutoff,args.minlength,args.minc)
           
         
         if len(dmrs)!=0:
@@ -244,80 +252,82 @@ def main(c):
             scores=pd.DataFrame(scores,columns=['confidence_scores'])
             max_delta=pd.DataFrame(max_delta,columns=['max_delta'])
             name_win=[]
-            comb_samples=itertools.combinations(list(samplenames), 2)
+            comb_samples=itertools.combinations(list(topass['samplenames']), 2)
             for i in comb_samples:
-# 
                 name_win.append(i[0]+"_VS_"+i[1])
             sign_win1=pd.DataFrame(sign_win1,columns=name_win)
             dmr_final=pd.concat([df1.chr[0:len(dmrs)],dmrs,max_delta,scores,sign_win1],axis=1)
-            dmr_final=dmr_final[dmr_final.max_delta>=d]
+            dmr_final=dmr_final[dmr_final.max_delta>=args.delta]
             dmr_final=dmr_final.reset_index(drop=True)
             dmr_final['chr'] = dmr_final['chr'].astype(str)
-            dmr_final.to_csv(o.outputpath+'/HOME_Timeseries_DMRs'+"/"+"Timeseries_HOME_DMR_{c}.txt".format(c=c),header=True, index=False,sep='\t')
+            dmr_final.to_csv(args.outputpath+'/HOME_Timeseries_DMRs'+"/"+"Timeseries_HOME_DMR_{c}.txt".format(c=c),header=True, index=False,sep='\t')
             print(("DMRs for {c} done".format(c=c)))
-            for filename in glob.glob(o.outputpath+'/temp_HOME'+"/df_{c}_*.txt".format(c=c)) :
+            for filename in glob.glob(args.outputpath+'/temp_HOME'+"/df_{c}_*.txt".format(c=c)) :
                 os.remove(filename)      
-        return 
-           
     except Exception as e:
         raise Exception(e.message)
+
+    return 
+
 #main code
 
 ## Inputs from user  
-np.set_printoptions(threshold=np.inf,suppress=True,linewidth=np.inf,precision=3)
-parser = argparse.ArgumentParser(description='HOME -- HISTOGRAM Of METHYLATION',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-i','--samplefilepath', help='path of the sample file with samplename and sample path TAB seperated', required=True)
-parser.add_argument('-t','--type', help='type of class', choices=["CG","CHG","CHH","CHN","CNN"],required=True, type=str)
-parser.add_argument('-o','--outputpath', help='path where the DMRs will be saved', required=True)
-parser.add_argument('-npp','--numprocess', help='number of process to be run at a time', required=False, type=int,default=10)
-parser.add_argument('-sc','--scorecutoff',  help='min classifier score required to cluster the DMR',choices=np.arange(0,1,0.1), required=False, type=float,default=0.5)
-parser.add_argument('-ml','--minlength', help='minimum length of DMRs to be reported', required=False, type=int,default=10)
-parser.add_argument('-sin','--singlechrom',  help='parallel for single chromosomes',action='store_true',default=False)
-parser.add_argument('-ns','--numsamples', help='number of samples to use for timeseries DMR calling', required=False, type=int)
-parser.add_argument('-sp','--startposition', help='start position of samples to use for timeseries DMR calling', required=False, type=int)
-parser.add_argument('-BSSeeker2','--BSSeeker2',  help='input CGmap file from BS-Seeker2',action='store_true',default=False)
-parser.add_argument('-mc','--minc', help='minimum number of C in a DMR to reported', required=False, type=int,default=4)
-parser.add_argument('-d','--delta', help='minimum average difference in methylation required', required=False, type=float,default=0.1)
-parser.add_argument('-Keepall','--Keepall',  help='Keep all cytosine positions present in atleast one replicate',action='store_true',default=False)
-if __name__ == "__main__":
-    
+def real_main():
+    topass = dict()
+    np.set_printoptions(threshold=np.inf,suppress=True,linewidth=np.inf,precision=3)
+    parser = argparse.ArgumentParser(description='HOME -- HISTOGRAM Of METHYLATION',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-i','--samplefilepath', help='path of the sample file with samplename and sample path TAB seperated', required=True)
+    parser.add_argument('-t','--type', help='type of class', choices=["CGN","CHN"],required=True, type=str)
+    parser.add_argument('-o','--outputpath', help='path where the DMRs will be saved', required=True)
+    parser.add_argument('-npp','--numprocess', help='number of process to be run at a time', required=False, type=int,default=10)
+    parser.add_argument('-sc','--scorecutoff',  help='min classifier score required to cluster the DMR',choices=np.arange(0,1,0.1), required=False, type=float,default=0.5)
+    parser.add_argument('-ml','--minlength', help='minimum length of DMRs to be reported', required=False, type=int,default=10)
+    #parser.add_argument('-sin','--singlechrom',  help='parallel for single chromosomes',action='store_true',default=False)
+    parser.add_argument('-ns','--numsamples', help='number of samples to use for timeseries DMR calling', required=False, type=int)
+    parser.add_argument('-sp','--startposition', help='start position of samples to use for timeseries DMR calling', required=False, type=int)
+    #parser.add_argument('-BSSeeker2','--BSSeeker2',  help='input CGmap file from BS-Seeker2',action='store_true',default=False)
+    parser.add_argument('-mc','--minc', help='minimum number of C in a DMR to reported', required=False, type=int,default=4)
+    parser.add_argument('-d','--delta', help='minimum average difference in methylation required', required=False, type=float,default=0.1)
+    parser.add_argument('-Keepall','--Keepall',  help='Keep all cytosine positions present in atleast one replicate',action='store_true',default=False)
     
     ## Read the inputs and preprocess the files 
-    o=parser.parse_args()
-    classes=o.type
-    if o.startposition is not None:
+    args=parser.parse_args()
+    classes=args.type
+    if args.startposition is not None:
         
-        sp=(o.startposition)-1
+        sp=(args.startposition)-1
     else:
         
         sp=0
         
-    if o.numsamples is not None:
+    if args.numsamples is not None:
         
-        ns=o.numsamples
+        ns=args.numsamples
     else:
         
-        ns=len(o.samplefilepath)
-    Keepall=o.Keepall    
-    BSSeeker2=o.BSSeeker2
-    df_file=pd.read_table(o.samplefilepath,header=None)
+        ns=len(args.samplefilepath)
+    #Keepall=args.Keepall    
+    #BSSeeker2=o.BSSeeker2
+    df_file=pd.read_table(args.samplefilepath,header=None)
     samplenames=df_file.iloc[sp:sp+ns,0]
     samplenames.reset_index(drop=True,inplace=True)
+    topass['samplenames'] = samplenames
     input_files=df_file.iloc[sp:sp+ns,1:]
     input_files.reset_index(drop=True,inplace=True)
-    numreps=[len(input_files.ix[x].dropna()) for x in range (len(input_files))]
+    numreps=[len(input_files.iloc[x].dropna()) for x in range (len(input_files))]
+    topass['numreps']=numreps
     
-    input_files=[list(input_files.ix[x].dropna()) for x in range (len(input_files))]
+    input_files=[list(input_files.iloc[x].dropna()) for x in range (len(input_files))]
     
     k=-1
     cwd = os.getcwd()
     
     
-    if not os.path.exists((o.outputpath+'/temp_HOME')):
-                os.makedirs(o.outputpath+'/temp_HOME')
+    if not os.path.exists((args.outputpath+'/temp_HOME')):
+                os.makedirs(args.outputpath+'/temp_HOME')
     else: 
         print(" Temp directory at output path already exist.... please clean up and rerun")
-        sys.exit()
+        #sys.exit()
                   
     input_files_mod=[]
     
@@ -328,132 +338,66 @@ if __name__ == "__main__":
           for ii in range(len(i)):
               
          
-              if not os.path.exists((o.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1))):
-                  
-                  os.makedirs((o.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1)))
-                  os.chdir((o.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1)))
-                  
-                  if i[ii].endswith('.gz') and BSSeeker2==True:
-                      
-                      if classes=="CG":
-                      
-                          com='zcat'+' '+i[ii]+'''| awk -v OFS='\t' '{if ($2 == "C" && substr($4,1,2)== "CG") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,1,2) =="CG")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  '''
-                      
-                      elif classes=="CHG": 
-                          
-                          com='zcat'+' '+i[ii]+'''| awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)== "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  '''
-                      
-                      elif classes=="CHH":
-                          
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' 
-                          
-                      elif classes=="CHN": 
-                          
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' 
-                          
-                      elif classes=="CNN":
-                          
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if ($2 == "C" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" )  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' 
-                      
-                  elif  i[ii].endswith('.gz') and BSSeeker2==False: 
-                      
-                      if classes=="CG":
-                      
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,1,2)== "CG") {print $0 >> $1".tsv"}}'  '''
-                      
-                      elif classes=="CHG": 
-                          
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $0 >> $1".tsv"}}'  '''
-                      
-                      elif classes=="CHH":
-                          
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $0 >> $1".tsv"}}'  '''
-                          
-                      elif classes=="CHN": 
-                          
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{if (substr($4,2,1)!= "G" ) {print $0 >> $1".tsv"}}'  '''
-                          
-                      elif classes=="CNN":
-                          
-                          com='zcat'+' '+i[ii]+ ''' | awk -v OFS='\t' '{print $0 >> $1".tsv"}'  ''' 
-                          
-                  elif not i[ii].endswith('.gz') and BSSeeker2==True:
-                      
-                      if classes=="CG":
-                      
-                          com= '''  awk -v OFS='\t' '{if ($2 == "C" && substr($4,1,2)== "CG") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,1,2) =="CG")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                      
-                      elif classes=="CHG": 
-                          
-                          com=''' awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)== "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                      
-                      elif classes=="CHH":
-                          
-                          com= '''  awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G" && substr($4,3,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                          
-                      elif classes=="CHN": 
-                          
-                          com='''  awk -v OFS='\t' '{if ($2 == "C" && substr($4,2,1)!= "G" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" && substr($4,2,1)!= "G")  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                          
-                      elif classes=="CNN":
-                          
-                          com='''  awk -v OFS='\t' '{if ($2 == "C" ) {print $1,$3,"+",$4,$7,$8 >> $1".tsv"} else if ($2 == "G" )  {print $1,$3,"-",$4,$7,$8 >> $1".tsv"}}'  ''' + i[ii]
-                      
-                        
+              if True:
+                  if not os.path.exists((args.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1))):
+                      os.makedirs((args.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1)))
+                  os.chdir((args.outputpath+'/temp_HOME'+'/'+samplenames[k]+'_rep'+str(ii+1)))
+
+                  com='zcat -f '+i[ii]+ ' | '
+                  if classes=="CGN":
+                      com+=''' awk -v OFS='\t' '{if (substr($4,1,2)== "CG") {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6 >> $1".tsv"; print $1>>"chr.txt"}}'  '''
                   else:
-                      
-                      if classes=="CG":
-                      
-                          com= '''  awk -v OFS='\t' '{if (substr($4,1,2)== "CG") {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                      
-                      elif classes=="CHG": 
-                          
-                          com=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)== "G") {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                      
-                      elif classes=="CHH":
-                          
-                          com=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G" && substr($4,3,1)!= "G") {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                          
-                      elif classes=="CHN": 
-                          
-                          com=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G" ) {print $0 >> $1".tsv"}}'  ''' + i[ii]
-                          
-                      elif classes=="CNN":
-                          
-                          com=''' awk -v OFS='\t' '{print $0 >> $1".tsv"}'  ''' + i[ii]
-                        
+                      com+=''' awk -v OFS='\t' '{if (substr($4,2,1)!= "G") {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6 >> $1".tsv"; print $1>>"chr.txt"}}'  '''
+
+
                   status=subprocess.call(com, shell=True)
                   
                   temp_file.append(os.getcwd())
                   os.chdir(cwd)
           input_files_mod.append(temp_file)        
     input_files=input_files_mod
+    print(input_files)
     del(input_files_mod,temp_file)
-    s=[ os.path.splitext(os.path.basename(x))[0] for x in glob.glob(input_files[0][0]+'/*.tsv')]
+    #s=[ os.path.splitext(os.path.basename(x))[0] for x in glob.glob(input_files[0][0]+'/*.tsv')]
+    #s=[ os.path.splitext(os.path.basename(x))[0] for x in glob.glob(input_files[0][0]+'/*.tsv')]
+    s = []
+    with open(input_files[0][0]+'/chr.txt') as f:
+        lines = f.readlines()
+        seen = set()
+        seen_add = seen.add
+        for x in lines:
+            x = x.strip()
+            if not (x in seen or seen_add(x)):
+                s.append(x)
+    print(s)
      
     os.chdir(cwd)  
     
       
-    if not os.path.exists((o.outputpath+'/temp_HOME'+'/chunks')):
-        os.makedirs(o.outputpath+'/temp_HOME'+'/chunks')
+    if not os.path.exists((args.outputpath+'/temp_HOME'+'/chunks')):
+        os.makedirs(args.outputpath+'/temp_HOME'+'/chunks')
     else: 
         print(" Temp directory at output path already exist.... please clean up and rerun")
-    if not os.path.exists((o.outputpath+'/HOME_Timeseries_DMRs')):
-        os.makedirs(o.outputpath+'/HOME_Timeseries_DMRs') 
+    if not os.path.exists((args.outputpath+'/HOME_Timeseries_DMRs')):
+        os.makedirs(args.outputpath+'/HOME_Timeseries_DMRs') 
 
      
        
-    sc=o.scorecutoff
-    d=o.delta
-    minlen=o.minlength
-    mc=o.minc
-    sin=o.singlechrom
-    npp=o.numprocess
-    if sin==True:
-        nop=npp
-        npp=1
-    else: 
-        nop=1
+    #sc=args.scorecutoff
+    #prn=o.prunningC
+    #tr=o.pruncutoff
+    #minlen=args.minlength
+
+    #mc=args.minc
+    #d=args.delta
+    #sin=o.singlechrom
+    npp=args.numprocess
+    nop=1
+    #if sin==True:
+    #    nop=npp
+    #    npp=1
+    #else: 
+    #    nop=1
         
    
    #"handle any number of replicates as long as it is 2+ in all groups but cannot handle 1 replicate in 1 group and multiple in the other"
@@ -463,7 +407,10 @@ if __name__ == "__main__":
     pd.options.mode.chained_assignment = None
     mergeo = functools.partial(pd.merge, how='outer', on=['chr','pos',"strand","type"])  
     merge = functools.partial(pd.merge, how='inner', on=['chr','pos',"strand","type"])
-    dictionary = OrderedDict(list(zip(list(samplenames),list(input_files))))
+    topass['mergeo']=mergeo
+    topass['merge']=merge
+    topass['dictionary'] = OrderedDict(list(zip(list(samplenames),list(input_files))))
+    #dictionary = OrderedDict(list(zip(list(samplenames),list(input_files))))
     comb_samples=itertools.combinations(list(samplenames), 2)
 #    
 #          
@@ -474,24 +421,31 @@ if __name__ == "__main__":
 ### multiprocessing the chromosomes        
         
         if npp==1:  
-                     
-    
+                print('heng',s)
+                #sys.exit(0)
                 for dx in s:
-                   main(dx)
-                shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
+                    print('haha',dx)
+                    main(dx,nop,topass,args)
+                shutil.rmtree(args.outputpath+'/temp_HOME', ignore_errors=True)
                 print("Congratulations the DMRs are ready") 
-                remEmptyDir(o.outputpath+'/HOME_DMRs/')
+                remEmptyDir(args.outputpath+'/HOME_DMRs/')
                 
           
         elif npp>1:
-           
+                print('hu',s)
+                #sys.exit(0)
                 pool1= multiprocessing.Pool(processes=npp)
-                process=[pool1.apply_async(main, args=(dx,)) for dx in s]
+                process=[pool1.apply_async(main, args=(dx,nop,topass,args)) for dx in s]
                 output = [p.get() for p in process]
                 pool1.close()
                 print("Congratulations the DMRs are ready")
                 pool1.join()
-                shutil.rmtree(o.outputpath+'/temp_HOME', ignore_errors=True)
-                remEmptyDir(o.outputpath+'/HOME_DMRs/')
+                #shutil.rmtree(args.outputpath+'/temp_HOME', ignore_errors=True)
+                #remEmptyDir(args.outputpath+'/HOME_DMRs/')
+        
+        with open(args.outputpath+'/HOME_Timeseries_DMRs/results.tsv','w') as fout:
+            for c in s:
+                with open(args.outputpath+f'/HOME_Timeseries_DMRs/Timeseries_HOME_DMR_{c}.txt') as fin:
+                    lines = fin.readlines()
+                fout.writelines( lines[1:] )
 
-          

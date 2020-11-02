@@ -12,24 +12,13 @@ import subprocess
 from sklearn import preprocessing
 #from sklearn.externals import joblib
 import statsmodels.stats.proportion as sm
+from pathlib import Path
+from HOME.home_utils import *
 
-def fill_na(df_file):
-    filter_col = [col for col in list(df_file) if col.startswith(('mc'))]
-    filter_col1 = [col for col in list(df_file) if col.startswith(('h'))]
-    df=df_file[filter_col]
-    df=df.bfill(axis=1).ffill(axis=1)
-    df_file[filter_col]
-    df_file[filter_col]=df
-    df_file[filter_col]=df_file[filter_col].astype(int)
-    
-    df=df_file[filter_col1]
-    df=df.bfill(axis=1).ffill(axis=1)
-    df_file[filter_col1]=df
-    df_file[filter_col1]=df_file[filter_col1].astype(int)
-    return df_file
 
 def format_allc(df,classes):
-   if classes=="CG":
+    #if classes=="CG":
+    if classes=="CGN":
         filter_col = [col for col in list(df) if col.startswith(('chr',"strand",'pos','mc','h'))]
         df=df[filter_col]
         v=df.chr[0] 
@@ -46,7 +35,8 @@ def format_allc(df,classes):
         filter_col = [col for col in list(df) if col.startswith(('h'))]
         df=df[(df[filter_col]> 0).all(axis=1)]
         df=df.reset_index(drop=True)
-   elif classes=="CHN" or classes=="CHG" or classes=="CHH" or classes=="CNN":
+    #elif classes=="CHN" or classes=="CHG" or classes=="CHH" or classes=="CNN":
+    else:
         
         filter_col = [col for col in list(df) if col.startswith(('chr','pos','mc','h'))]
         df=df[filter_col]
@@ -55,7 +45,7 @@ def format_allc(df,classes):
         df=df[(df[filter_col]> 0).all(axis=1)]
         df=df.reset_index(drop=True)        
       
-   return df
+    return df
 def pval_cal_withoutrep(df):
     df=df.rename(columns = {'mc2_rep1':'mc_case','mc1_rep1':'mc_cont','h2_rep1':'h_case','h1_rep1':'h_cont'})
     meth_case=df.mc_case.divide(df.h_case)
@@ -82,9 +72,6 @@ def pval_cal_withoutrep(df):
     df1=pd.concat([df, pd.DataFrame({"exp_val":scaled_exp_val}),pd.DataFrame({"smooth_val":scaled_smooth_exp_val})], axis=1)
     return df1
     
-def process_frame_withR(file1):
-    com="Rscript ./scripts/HOME_R_time.R" + " "+file1
-    subprocess.call(com, shell=True)
     
 def pval_format_withrep(df_path):
     df=pd.read_table(df_path,header=0)
@@ -136,43 +123,6 @@ def pval_format_withrep(df_path):
     
     return df
 
-def chunker1(seq, sizes):
- idx=0
- for s in sizes:
-
-    k=seq[idx:idx+s]
-    idx=idx+s
- 
-    yield k
-def chunker(seq, size):
-  
-   for pos in range(0, len(seq), size):
-    
-    start_df=max(0,pos-25)
-    start=max(0,pos)
-    stop_df=min(len(seq),pos+size+25)
-    stop=min(len(seq),((pos+size)-1))
-    k=seq[start_df:stop_df]
-    
-  
-    yield (k,start,stop)        
-def smoothing(*a):
-    
-    import numpy as np
-    
-    avg_value=[]
-    for i in range(len(a)):
-        if np.sign(i-1)==-1:
-            p=0
-        else:
-            p=a[i-1]
-        if i+1==len(a):
-            n=0
-        else:
-            n=a[i+1]
-        avg_value.append(np.divide(float(p+a[i]+n),3))
-        
-    return avg_value  
 def norm_slidingwin_predict_CG(df_file,input_file_path,model_path):
     b=-0.123176135253
     m=1.95258046977

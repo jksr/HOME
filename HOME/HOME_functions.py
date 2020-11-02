@@ -9,32 +9,23 @@ import subprocess
 import pandas as pd 
 from itertools import groupby
 import numpy as np
+from pathlib import Path
 
 from sklearn import preprocessing
 #from sklearn.externals import joblib
 import statsmodels.stats.proportion as sm
+from HOME.home_utils import *
+
+
+
 def fun_win(val):
      t=1-(min(val,1))
      return t 
 
-def fill_na(df_file):
-    filter_col = [col for col in list(df_file) if col.startswith(('mc'))]
-    filter_col1 = [col for col in list(df_file) if col.startswith(('h'))]
-    df=df_file[filter_col]
-    df=df.bfill(axis=1).ffill(axis=1)
-    df_file[filter_col]
-    df_file[filter_col]=df
-    df_file[filter_col]=df_file[filter_col].astype(int)
-    
-    df=df_file[filter_col1]
-    df=df.bfill(axis=1).ffill(axis=1)
-    df_file[filter_col1]=df
-    df_file[filter_col1]=df_file[filter_col1].astype(int)
-    return df_file
 
 def format_allc(df,classes):
-   #if classes=="CG":
-   if classes=="CGN":
+    #if classes=="CG":
+    if classes=="CGN":
         filter_col = [col for col in list(df) if col.startswith(('chr',"strand",'pos','mc','h'))]
         df=df[filter_col]
         v=df.chr[0] 
@@ -51,20 +42,17 @@ def format_allc(df,classes):
         filter_col = [col for col in list(df) if col.startswith(('h'))]
         df=df[(df[filter_col]> 0).all(axis=1)]
         df=df.reset_index(drop=True)
-   #elif classes=="CHN" or classes=="CHG" or classes=="CHH" or classes=="CNN":
-   else:
-
+    #elif classes=="CHN" or classes=="CHG" or classes=="CHH" or classes=="CNN":
+    else:
+    
         filter_col = [col for col in list(df) if col.startswith(('chr','pos','mc','h'))]
         df=df[filter_col]
         df=df.reset_index(drop=True)
         filter_col = [col for col in list(df) if col.startswith(('h'))]
         df=df[(df[filter_col]> 0).all(axis=1)]
         df=df.reset_index(drop=True)        
-      
-   return df
-def process_frame_withR(file1):
-    com="Rscript ./scripts/HOME_R.R" + " "+file1
-    subprocess.call(com, shell=True)
+       
+    return df
     
 def pval_cal_withoutrep(df):
     df=df.rename(columns = {'mc_case_rep1':'mc_case','mc_cont_rep1':'mc_cont','h_case_rep1':'h_case','h_cont_rep1':'h_cont'})
@@ -92,15 +80,7 @@ def pval_cal_withoutrep(df):
     df1=pd.concat([df, pd.DataFrame({"exp_val":scaled_exp_val}),pd.DataFrame({"smooth_val":scaled_smooth_exp_val})], axis=1)
     df1=df1.fillna(0)  
     return df1
-def chunker1(seq, sizes):
- idx=0
- for s in sizes:
 
-    k=seq[idx:idx+s]
-    idx=idx+s
- 
-    yield k
-    
 def pval_format_withrep(df_path):
     df=pd.read_table(df_path,header=0)
     
@@ -151,35 +131,6 @@ def pval_format_withrep(df_path):
     df=df.fillna(0) 
     return df
     
-def smoothing(*a):
-    
-    import numpy as np
-    
-    avg_value=[]
-    for i in range(len(a)):
-        if np.sign(i-1)==-1:
-            p=0
-        else:
-            p=a[i-1]
-        if i+1==len(a):
-            n=0
-        else:
-            n=a[i+1]
-        avg_value.append(np.divide(float(p+a[i]+n),3))
-        
-    return avg_value
-def chunker(seq, size):
-  
-   for pos in range(0, len(seq), size):
-    
-    start_df=max(0,pos-25)
-    start=max(0,pos)
-    stop_df=min(len(seq),pos+size+25)
-    stop=min(len(seq),((pos+size)-1))
-    k=seq[start_df:stop_df]
-    
-  
-    yield (k,start,stop)    
 def norm_slidingwin_predict_CG(df_file,input_file_path,model_path):
     b=-0.123176135253
     m=1.95258046977

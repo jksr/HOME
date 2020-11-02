@@ -1,3 +1,3 @@
-sample1	./testcase/CG/sample1_r1.txt	./testcase/CG/sample1_r2.txt
-sample2	./testcase/CG/sample2_r1.txt	./testcase/CG/sample2_r2.txt
-sample3	./testcase/CG/sample3_r1.txt	./testcase/CG/sample3_r2.txt
+sample1	/home/wtian/ddn/workspace/dmr_home_caller/code_base/myHOME/testcase/CG/sample1_r1.txt	/home/wtian/ddn/workspace/dmr_home_caller/code_base/myHOME/testcase/CG/sample1_r2.txt
+sample2	/home/wtian/ddn/workspace/dmr_home_caller/code_base/myHOME/testcase/CG/sample2_r1.txt	/home/wtian/ddn/workspace/dmr_home_caller/code_base/myHOME/testcase/CG/sample2_r2.txt
+sample3	/home/wtian/ddn/workspace/dmr_home_caller/code_base/myHOME/testcase/CG/sample3_r1.txt	/home/wtian/ddn/workspace/dmr_home_caller/code_base/myHOME/testcase/CG/sample3_r2.txt
